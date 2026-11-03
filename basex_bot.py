@@ -47,8 +47,8 @@ except ImportError:
 # ══════════════════════════════════════════════════════════════════════════════
 # CONFIG
 # ══════════════════════════════════════════════════════════════════════════════
-TOKEN        = os.environ.get("BOT_TOKEN", "9085287623:AAHpkE7dw1kOM5S-9VzkwbSFFNW7gPIr_Qk")
-ADMIN_IDS    = [int(x) for x in os.environ.get("ADMIN_IDS", "8659163332").split(",") if x.strip().isdigit()]
+TOKEN        = os.environ.get("BOT_TOKEN", "7149909490:AAFQAEJgqDyOvRfX1T7boO-qYCWAGAsxAsg")
+ADMIN_IDS    = [int(x) for x in os.environ.get("ADMIN_IDS", "1707478010").split(",") if x.strip().isdigit()]
 SUPPORT      = "@BASE_XE"
 CHANNEL_ID   = "@givewayess1"
 CHANNEL_URL  = "https://t.me/givewayess1"
