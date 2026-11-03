@@ -1,0 +1,1662 @@
+/* ==========================================================================
+   SECTION 1: DESIGN TOKENS, OLED PALETTE & CSS RESET
+   ========================================================================== */
+:root {
+  --bg-oled: #000000;
+  --bg-surface: #0a0a0a;
+  --bg-card: #111111;
+  --border-subtle: #1f1f1f;
+  --border-strong: #333333;
+  --text-primary: #ffffff;
+  --text-secondary: #999999;
+  --text-muted: #555555;
+  --accent-blue: #0070d1;
+  --accent-gold: #f59e0b;
+  --accent-green: #22c55e;
+  --accent-red: #ef4444;
+  --font-main: 'Google Sans', 'Google Sans Text', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', Consolas, monospace;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  background-color: var(--bg-oled);
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: var(--font-main);
+  background-color: var(--bg-oled);
+  min-height: 100vh;
+  line-height: 1.5;
+  overflow-x: hidden;
+}
+
+/* Custom sharp scrollbars */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #2b2b2b #000000;
+}
+
+*::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+  background-color: #000000;
+}
+
+*::-webkit-scrollbar-track {
+  background-color: #000000;
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: #2b2b2b;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background-color: #444444;
+}
+
+.font-mono {
+  font-family: var(--font-mono);
+}
+
+.hidden {
+  display: none !important;
+}
+
+/* ==========================================================================
+   SECTION 2: APPLICATION SHELL, PRELOADER & TOP BAR
+   ========================================================================== */
+.site-preloader {
+  position: fixed;
+  inset: 0;
+  background: var(--bg-oled);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.4s ease, visibility 0.4s ease;
+}
+
+.site-preloader.fade-out {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.site-preloader-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+
+.site-preloader-brand {
+  font-size: 1.4rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.site-preloader-track {
+  width: 140px;
+  height: 2px;
+  background: #1a1a1a;
+  overflow: hidden;
+  position: relative;
+}
+
+.site-preloader-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 40%;
+  background: #ffffff;
+  animation: preloaderSlide 1.2s ease-in-out infinite;
+}
+
+.site-preloader-status {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  color: var(--text-muted);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+
+@keyframes preloaderSlide {
+  0% { left: -40%; width: 30%; }
+  50% { width: 60%; }
+  100% { left: 100%; width: 30%; }
+}
+
+/* App Shell */
+.oled-root {
+  min-height: 100vh;
+  width: 100%;
+  padding: 40px 24px 100px;
+}
+
+.oled-root.is-centered {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 30px 20px 80px;
+}
+
+.oled-container {
+  width: 100%;
+  max-width: 860px;
+  margin: 0 auto;
+}
+
+/* Header */
+.oled-top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--border-subtle);
+  padding-bottom: 18px;
+  margin-bottom: 28px;
+}
+
+.oled-brand-box {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.oled-brand-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.oled-release-badge {
+  font-size: 0.65rem;
+  font-weight: 700;
+  background: #161616;
+  color: #aaaaaa;
+  border: 1px solid #2e2e2e;
+  padding: 2px 7px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.oled-top-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.oled-account-preview {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.oled-online-id {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #dddddd;
+  letter-spacing: 0.04em;
+}
+
+.oled-tier-badge {
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  background: #111111;
+  color: var(--accent-gold);
+  border: 1px solid var(--accent-gold);
+  padding: 2px 7px;
+}
+
+.oled-btn-logout {
+  background: transparent;
+  color: var(--text-secondary);
+  border: 1px solid var(--border-strong);
+  padding: 5px 12px;
+  font-size: 0.76rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.oled-btn-logout:hover {
+  background: #ffffff;
+  color: #000000;
+  border-color: #ffffff;
+}
+
+.oled-btn-info {
+  background: transparent;
+  color: var(--text-secondary);
+  border: 1px solid var(--border-strong);
+  width: 30px;
+  height: 30px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.oled-btn-info:hover {
+  background: #ffffff;
+  color: #000000;
+  border-color: #ffffff;
+}
+
+/* ==========================================================================
+   SECTION 3: TOKEN INPUT & PROGRESS LOGS ACCORDION
+   ========================================================================== */
+.oled-unified-card {
+  background: var(--bg-oled);
+  border: 1px solid var(--border-subtle);
+  margin-bottom: 24px;
+  transition: border-color 0.2s ease;
+}
+
+.oled-unified-card:hover {
+  border-color: var(--border-strong);
+}
+
+.oled-token-group {
+  padding: 22px;
+}
+
+.oled-label {
+  display: block;
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin-bottom: 10px;
+  letter-spacing: 0.02em;
+}
+
+.oled-input-row {
+  display: flex;
+  gap: 8px;
+  align-items: stretch;
+}
+
+.oled-input-field {
+  flex: 1;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-strong);
+  color: var(--text-primary);
+  padding: 11px 14px;
+  font-size: 0.85rem;
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.oled-input-field:focus {
+  border-color: var(--accent-blue);
+}
+
+.oled-input-field.input-error {
+  border-color: var(--accent-red);
+  animation: shake 0.35s ease-in-out;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  50% { transform: translateX(5px); }
+  75% { transform: translateX(-3px); }
+}
+
+.oled-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  color: var(--text-primary);
+  border: 1px solid var(--border-strong);
+  padding: 10px 18px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.oled-btn:hover {
+  border-color: #666666;
+}
+
+.oled-btn-primary {
+  background: #ffffff;
+  color: #000000;
+  border-color: #ffffff;
+}
+
+.oled-btn-primary:hover {
+  background: #e5e5e5;
+  border-color: #e5e5e5;
+}
+
+.oled-btn-icon {
+  padding: 0 14px;
+}
+
+.oled-token-sub-row {
+  margin-top: 12px;
+}
+
+.oled-trigger-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 0.78rem;
+  cursor: pointer;
+  padding: 4px 0;
+}
+
+.oled-trigger-btn:hover {
+  color: var(--text-primary);
+}
+
+.oled-chevron {
+  transition: transform 0.25s ease;
+}
+
+.oled-chevron.open {
+  transform: rotate(180deg);
+}
+
+/* Accordion Drawers */
+.oled-drawer-animated {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.25s ease-out;
+}
+
+.oled-drawer-animated.open {
+  grid-template-rows: 1fr;
+}
+
+.oled-drawer-content {
+  overflow: hidden;
+}
+
+.oled-tutorial-card {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 16px 0 4px;
+  border-top: 1px dashed var(--border-subtle);
+  margin-top: 12px;
+}
+
+.oled-tutorial-step {
+  display: flex;
+  gap: 12px;
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+}
+
+.oled-tutorial-step strong {
+  color: var(--text-primary);
+}
+
+.step-idx {
+  font-family: var(--font-mono);
+  color: var(--text-muted);
+  font-weight: 700;
+}
+
+.oled-link {
+  color: var(--accent-blue);
+  text-decoration: none;
+  font-size: 0.78rem;
+  display: inline-block;
+  margin-top: 2px;
+}
+
+.oled-link:hover {
+  text-decoration: underline;
+}
+
+.oled-code {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  color: #cccccc;
+  padding: 6px 10px;
+  font-size: 0.75rem;
+  margin: 6px 0;
+  word-break: break-all;
+}
+
+.oled-box-divider {
+  height: 1px;
+  background: var(--border-subtle);
+}
+
+/* Logs Drawer */
+.oled-accordion-head {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 22px;
+  background: transparent;
+  border: none;
+  color: var(--text-primary);
+  cursor: pointer;
+}
+
+.oled-accordion-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.oled-accordion-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.oled-mini-badge {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  font-weight: 700;
+  background: #181818;
+  color: #aaaaaa;
+  border: 1px solid #333333;
+  padding: 1px 6px;
+}
+
+.badge-error {
+  color: var(--accent-red);
+  border-color: var(--accent-red);
+}
+
+.badge-success {
+  color: var(--accent-green);
+  border-color: var(--accent-green);
+}
+
+.oled-meta-caption {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+.oled-logs-group .oled-drawer-content {
+  padding: 0 22px 18px;
+}
+
+.oled-progress-bar-wrap {
+  height: 2px;
+  background: #181818;
+  margin-bottom: 12px;
+  overflow: hidden;
+}
+
+.oled-progress-bar {
+  height: 100%;
+  background: #ffffff;
+  transition: width 0.3s ease;
+}
+
+.oled-progress-bar.bar-error {
+  background: var(--accent-red);
+}
+
+.oled-log-stream {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  padding: 10px 12px;
+  max-height: 140px;
+  overflow-y: auto;
+  font-size: 0.74rem;
+  color: #888888;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.log-line {
+  line-height: 1.4;
+}
+
+.log-line-error {
+  color: var(--accent-red);
+}
+
+/* ==========================================================================
+   SECTION 4: LIBRARY TABS & SEARCH BAR
+   ========================================================================== */
+.oled-library-box {
+  background: var(--bg-oled);
+  border: 1px solid var(--border-subtle);
+}
+
+.oled-library-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--border-subtle);
+  padding: 0 16px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.oled-tabs-nav {
+  display: flex;
+  gap: 4px;
+}
+
+.oled-tab-btn {
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--text-secondary);
+  font-family: var(--font-main);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  padding: 16px 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.oled-tab-btn:hover {
+  color: var(--text-primary);
+}
+
+.oled-tab-btn.active {
+  color: var(--text-primary);
+  border-bottom-color: #ffffff;
+}
+
+.tab-cnt {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  background: #181818;
+  color: #888888;
+  padding: 1px 5px;
+}
+
+.oled-tab-btn.active .tab-cnt {
+  background: #333333;
+  color: #ffffff;
+}
+
+.oled-subsearch {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-strong);
+  color: var(--text-primary);
+  padding: 6px 10px;
+  font-size: 0.78rem;
+  outline: none;
+  width: 220px;
+}
+
+.oled-subsearch:focus {
+  border-color: #666666;
+}
+
+.oled-tab-pane {
+  padding: 16px 20px;
+}
+
+/* ==========================================================================
+   SECTION 5: PLAYSTATION PLUS ENTITLEMENTS PANE
+   ========================================================================== */
+.oled-psplus-pane-wrap {
+  padding: 8px 0;
+}
+
+.oled-pane-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.oled-pane-heading {
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.oled-status-tag {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 3px 8px;
+}
+
+.status-active {
+  background: rgba(34, 197, 94, 0.1);
+  color: var(--accent-green);
+  border: 1px solid var(--accent-green);
+}
+
+.status-inactive {
+  background: #181818;
+  color: var(--text-muted);
+  border: 1px solid #333333;
+}
+
+.oled-info-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+.info-cell {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  padding: 14px;
+}
+
+.info-cell.full-width {
+  grid-column: 1 / -1;
+}
+
+.cell-label {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+}
+
+.cell-value {
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.cell-value-desc {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+/* ==========================================================================
+   SECTION 6: GAME LIST ROWS (SQUASH PROTECTION & 1:1 SQUARE ICONS)
+   ========================================================================== */
+.scrollable-games {
+  max-height: 540px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 4px 2px;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+.oled-game-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 14px;
+  min-height: 64px;
+  box-sizing: border-box;
+  flex: 0 0 auto;
+  flex-shrink: 0;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: 4px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1),
+              background 0.18s cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 0.18s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.oled-game-item:hover {
+  background: #141414;
+  border-color: #383838;
+  transform: translateX(4px);
+}
+
+.oled-game-item:hover .oled-game-icon {
+  transform: scale(1.05);
+}
+
+.oled-game-item:active,
+.oled-game-item.item-tapped {
+  transform: scale(0.98) translateX(2px);
+  background: #1c1c1c;
+  border-color: #ffffff;
+  box-shadow: 0 0 16px rgba(255, 255, 255, 0.08);
+}
+
+.oled-game-item.item-tapped::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at center, rgba(255, 255, 255, 0.18) 0%, transparent 70%);
+  animation: tapFlash 0.25s ease-out forwards;
+  pointer-events: none;
+}
+
+@keyframes tapFlash {
+  0% { opacity: 1; transform: scale(0.85); }
+  100% { opacity: 0; transform: scale(1.4); }
+}
+
+.oled-game-icon {
+  width: 48px;
+  height: 48px;
+  min-width: 48px;
+  min-height: 48px;
+  max-width: 48px;
+  max-height: 48px;
+  flex: 0 0 48px;
+  flex-shrink: 0;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  background: #161616;
+  border: 1px solid #282828;
+  border-radius: 4px;
+  display: block;
+  transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.oled-game-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 3px;
+}
+
+.oled-game-name {
+  font-size: 0.92rem;
+  font-weight: 600;
+  line-height: 1.35;
+  color: #ffffff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
+}
+
+.oled-game-sub {
+  font-size: 0.72rem;
+  font-family: var(--font-mono);
+  color: #888888;
+  line-height: 1.25;
+  display: block;
+}
+
+.oled-game-playtime {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: #cccccc;
+  background: #141414;
+  padding: 4px 10px;
+  border: 1px solid #282828;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+/* Footer */
+.oled-footer {
+  display: flex;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.oled-btn-outline {
+  flex: 1;
+  text-align: center;
+  background: transparent;
+  color: var(--text-primary);
+  border: 1px solid var(--border-strong);
+  padding: 12px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.oled-btn-outline:hover {
+  background: #ffffff;
+  color: #000000;
+  border-color: #ffffff;
+}
+
+/* ==========================================================================
+   SECTION 7: MODAL DIALOGS (INSPECTOR, EXPORT, ABOUT/FAQ) & 1:1 SQUARE COVERS
+   ========================================================================== */
+.ps-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.88);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  animation: backdropEnter 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.ps-modal-backdrop.is-closing {
+  animation: backdropLeave 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  pointer-events: none;
+}
+
+@keyframes backdropEnter {
+  from {
+    opacity: 0;
+    backdrop-filter: blur(0px);
+    -webkit-backdrop-filter: blur(0px);
+  }
+  to {
+    opacity: 1;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
+}
+
+@keyframes backdropLeave {
+  from {
+    opacity: 1;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
+  to {
+    opacity: 0;
+    backdrop-filter: blur(0px);
+    -webkit-backdrop-filter: blur(0px);
+  }
+}
+
+.ps-modal-dialog {
+  background: #0a0a0a;
+  border: 1px solid var(--border-strong);
+  width: 100%;
+  max-width: 540px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.9), 0 0 30px rgba(255, 255, 255, 0.03);
+  animation: modalDialogEnter 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: transform, opacity;
+}
+
+.ps-modal-backdrop.is-closing .ps-modal-dialog {
+  animation: modalDialogLeave 0.18s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes modalDialogEnter {
+  0% {
+    opacity: 0;
+    transform: scale(0.92) translateY(18px);
+    filter: blur(4px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+    filter: blur(0px);
+  }
+}
+
+@keyframes modalDialogLeave {
+  0% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+    filter: blur(0px);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.94) translateY(12px);
+    filter: blur(2px);
+  }
+}
+
+.ps-modal-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  background: rgba(0, 0, 0, 0.6);
+  border: 1px solid #333333;
+  color: #ffffff;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 1.2rem;
+  z-index: 10;
+  transition: all 0.15s ease;
+}
+
+.ps-modal-close:hover {
+  background: #ffffff;
+  color: #000000;
+  border-color: #ffffff;
+}
+
+/* Game Modal: Guaranteed Square Cover Artwork */
+.game-modal-dialog {
+  max-width: 580px;
+}
+
+.modal-game-header {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 24px 24px 20px 24px;
+  background: #0d0d0d;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.modal-cover-square-box {
+  width: 130px;
+  height: 130px;
+  min-width: 130px;
+  min-height: 130px;
+  aspect-ratio: 1 / 1;
+  background: #111111;
+  border: 1px solid var(--border-strong);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.85);
+  overflow: hidden;
+  flex-shrink: 0;
+  position: relative;
+}
+
+.modal-square-artwork {
+  width: 100%;
+  height: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  display: block;
+  animation: heroZoomIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes heroZoomIn {
+  from {
+    transform: scale(1.08);
+    opacity: 0.6;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.modal-header-meta {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.modal-specs-grid .spec-cell {
+  animation: specFadeIn 0.32s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.modal-specs-grid .spec-cell:nth-child(1) { animation-delay: 0.04s; }
+.modal-specs-grid .spec-cell:nth-child(2) { animation-delay: 0.08s; }
+.modal-specs-grid .spec-cell:nth-child(3) { animation-delay: 0.12s; }
+.modal-specs-grid .spec-cell:nth-child(4) { animation-delay: 0.16s; }
+.modal-specs-grid .spec-cell:nth-child(5) { animation-delay: 0.20s; }
+.modal-specs-grid .spec-cell:nth-child(6) { animation-delay: 0.24s; }
+
+@keyframes specFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.modal-dialog-body {
+  padding: 20px;
+}
+
+.modal-title-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.ps-platform-tag,
+.ps-license-tag {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 2px 7px;
+  border: 1px solid transparent;
+}
+
+.tag-ps5 { background: #003791; color: #ffffff; }
+.tag-ps4 { background: #1e293b; color: #cbd5e1; }
+
+.license-plus {
+  background: rgba(245, 158, 11, 0.15);
+  color: var(--accent-gold);
+  border-color: var(--accent-gold);
+}
+
+.license-owned {
+  background: #1e293b;
+  color: #ffffff;
+}
+
+.modal-game-name {
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin-bottom: 16px;
+  line-height: 1.3;
+}
+
+.modal-specs-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  background: #000000;
+  border: 1px solid var(--border-subtle);
+  padding: 14px;
+  margin-bottom: 18px;
+}
+
+.spec-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.spec-label {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  color: var(--text-muted);
+}
+
+.spec-val {
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.modal-actions-bar {
+  display: flex;
+  gap: 10px;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 16px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.btn-ps-primary {
+  flex: 1;
+  background: #ffffff;
+  color: #000000;
+}
+
+.btn-ps-primary:hover {
+  background: #e5e5e5;
+}
+
+.btn-ps-secondary {
+  background: transparent;
+  color: var(--text-primary);
+  border-color: var(--border-strong);
+}
+
+.btn-ps-secondary:hover {
+  border-color: #777777;
+}
+
+/* Copy List Modal */
+.copy-modal-dialog {
+  padding: 24px;
+}
+
+.copy-modal-tag {
+  font-size: 0.68rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+.copy-modal-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin: 4px 0 8px;
+}
+
+.copy-modal-subtitle {
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  margin-bottom: 18px;
+}
+
+.copy-options-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.copy-option-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-primary);
+  padding: 14px 16px;
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.copy-option-item:hover {
+  background: #141414;
+  border-color: var(--border-strong);
+}
+
+.copy-option-title-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.copy-option-title {
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+
+.copy-option-badge {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  background: #222222;
+  color: #aaaaaa;
+  padding: 2px 6px;
+}
+
+.copy-option-badge.badge-plus {
+  color: var(--accent-gold);
+}
+
+.copy-option-meta {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  margin-top: 4px;
+  display: block;
+}
+
+.copy-option-action {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+.copy-modal-hint {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  margin-top: 16px;
+  text-align: center;
+}
+
+/* About & FAQ Modal */
+.info-modal-dialog {
+  max-width: 620px;
+  max-height: 88vh;
+  display: flex;
+  flex-direction: column;
+  padding: 24px;
+}
+
+.info-modal-header {
+  margin-bottom: 16px;
+}
+
+.info-modal-tag-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.info-badge {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  background: #181818;
+  color: #888888;
+  border: 1px solid #2e2e2e;
+  padding: 2px 7px;
+}
+
+.info-badge.badge-version {
+  color: #ffffff;
+  border-color: #555555;
+  background: #222222;
+}
+
+.info-modal-title {
+  font-size: 1.35rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin-bottom: 4px;
+}
+
+.info-modal-subtitle {
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  line-height: 1.45;
+}
+
+.info-author-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  padding: 12px 14px;
+  margin-bottom: 18px;
+}
+
+.info-author-avatar-img {
+  width: 44px;
+  height: 44px;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  border: 1px solid #333333;
+  display: block;
+  flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.7);
+}
+
+.info-author-avatar {
+  width: 38px;
+  height: 38px;
+  background: #181818;
+  color: #ffffff;
+  border: 1px solid #333333;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  flex-shrink: 0;
+}
+
+.info-author-details {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.info-author-name {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.info-author-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-size: 0.74rem;
+  transition: color 0.15s ease;
+}
+
+.info-author-link:hover {
+  color: #ffffff;
+}
+
+.info-content-scroll {
+  overflow-y: auto;
+  max-height: calc(88vh - 210px);
+  padding-right: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.info-section-heading {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin-bottom: 12px;
+  border-bottom: 1px solid var(--border-subtle);
+  padding-bottom: 6px;
+  letter-spacing: -0.01em;
+}
+
+.info-steps-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.info-step-item {
+  display: flex;
+  gap: 12px;
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  padding: 12px 14px;
+}
+
+.info-step-item strong {
+  display: block;
+  color: var(--text-primary);
+  margin-bottom: 3px;
+}
+
+.info-step-item p {
+  line-height: 1.4;
+}
+
+.info-step-num {
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: var(--text-muted);
+  width: 22px;
+  flex-shrink: 0;
+  padding-top: 2px;
+}
+
+.faq-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.faq-item {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  padding: 14px 16px;
+  transition: border-color 0.15s ease;
+}
+
+.faq-item:hover {
+  border-color: var(--border-strong);
+}
+
+.faq-question {
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin-bottom: 6px;
+}
+
+.faq-answer {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  line-height: 1.45;
+}
+
+.faq-answer code {
+  background: #181818;
+  border: 1px solid #282828;
+  padding: 1px 4px;
+  color: #dddddd;
+  font-family: var(--font-mono);
+}
+
+/* ==========================================================================
+   SECTION 8: FLOATING AUTHOR BADGE & TOAST NOTIFICATIONS
+   ========================================================================== */
+.oled-floating-author-wrap {
+  position: fixed;
+  bottom: 16px;
+  left: 16px;
+  z-index: 50;
+}
+
+.btn-oled-author-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #000000;
+  border: 1px solid var(--border-strong);
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 5px 12px;
+  transition: all 0.2s ease;
+}
+
+.btn-oled-author-link:hover {
+  color: #ffffff;
+  border-color: #666666;
+}
+
+.author-floating-avatar {
+  width: 18px;
+  height: 18px;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  border: 1px solid #444444;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+.author-divider {
+  color: var(--text-muted);
+}
+
+/* Toast */
+.ps-toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  background: #111111;
+  border: 1px solid var(--border-strong);
+  color: #ffffff;
+  padding: 10px 18px;
+  font-size: 0.82rem;
+  font-weight: 500;
+  z-index: 2000;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.8);
+}
+
+/* ==========================================================================
+   SECTION 9: RESPONSIVE BREAKPOINTS (TABLET & MOBILE TOUCH ERGONOMICS)
+   ========================================================================== */
+@media (max-width: 768px) {
+  .oled-root {
+    padding: 20px 14px 80px;
+  }
+
+  .oled-top-bar {
+    flex-wrap: wrap;
+    gap: 12px;
+    padding-bottom: 14px;
+    margin-bottom: 20px;
+  }
+
+  .oled-library-header {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    padding: 10px 12px 12px;
+    gap: 10px;
+  }
+
+  .oled-tabs-nav {
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    gap: 6px;
+    padding: 0 2px 6px;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .oled-tabs-nav::-webkit-scrollbar {
+    display: none;
+  }
+
+  .oled-tab-btn {
+    flex-shrink: 0;
+    white-space: nowrap;
+    padding: 10px 12px;
+    font-size: 0.76rem;
+  }
+
+  .oled-search-container {
+    width: 100%;
+  }
+
+  .oled-subsearch {
+    width: 100%;
+    padding: 8px 12px;
+    font-size: 0.8rem;
+  }
+
+  .oled-tab-pane {
+    padding: 12px 10px;
+  }
+
+  .scrollable-games {
+    max-height: 58vh;
+    gap: 6px;
+  }
+
+  .oled-game-item {
+    min-height: 60px;
+    padding: 8px 12px;
+    gap: 12px;
+    flex: 0 0 auto;
+    flex-shrink: 0;
+  }
+
+  .oled-game-icon {
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    min-height: 44px;
+    max-width: 44px;
+    max-height: 44px;
+    flex: 0 0 44px;
+    flex-shrink: 0;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+    border-radius: 4px;
+  }
+
+  .oled-game-name {
+    font-size: 0.88rem;
+    line-height: 1.3;
+  }
+
+  .oled-game-sub {
+    font-size: 0.70rem;
+    line-height: 1.2;
+  }
+
+  .oled-game-playtime {
+    font-size: 0.68rem;
+    padding: 3px 8px;
+  }
+
+  .oled-info-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 560px) {
+  .modal-game-header {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 14px;
+    padding: 20px 16px 14px;
+  }
+
+  .modal-cover-square-box {
+    width: 120px;
+    height: 120px;
+    min-width: 120px;
+    min-height: 120px;
+    max-width: 120px;
+    max-height: 120px;
+    aspect-ratio: 1 / 1;
+    flex: 0 0 120px;
+    flex-shrink: 0;
+    margin: 0 auto;
+  }
+
+  .modal-header-meta {
+    align-items: center;
+    width: 100%;
+  }
+
+  .modal-title-row {
+    justify-content: center;
+  }
+
+  .modal-game-name {
+    font-size: 1.15rem;
+    text-align: center;
+  }
+
+  .oled-input-row {
+    flex-wrap: wrap;
+  }
+
+  .oled-input-field {
+    width: 100%;
+  }
+
+  .oled-btn-primary {
+    width: 100%;
+  }
+
+  .modal-specs-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .modal-actions-bar {
+    flex-direction: column;
+  }
+
+  .oled-footer {
+    flex-direction: column;
+  }
+}
+

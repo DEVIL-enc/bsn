@@ -1,0 +1,17 @@
+{
+  "name": "psnchecker",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "minimal oled-native playstation library inspector and entitlement fetcher",
+  "scripts": {
+    "start": "node server.mjs",
+    "web": "node server.mjs",
+    "cli": "node fetcher.mjs",
+    "build": "node -c server.mjs fetcher.mjs",
+    "release": "node -c server.mjs fetcher.mjs"
+  },
+  "dependencies": {
+    "psn-api": "^2.18.1"
+  }
+}

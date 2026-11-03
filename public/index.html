@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="PlayStation Network library inspector — view digital purchases, PS Plus entitlements, and playtime stats.">
+  <title>PlayStation Network — Library Inspector</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;600;700&family=Google+Sans+Text:wght@400;500;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" type="image/png" href="favicon.png">
+</head>
+<body>
+
+  <div id="sitePreloader" class="site-preloader">
+    <div class="site-preloader-content">
+      <div class="site-preloader-brand">psn checker</div>
+      <div class="site-preloader-track">
+        <div class="site-preloader-bar"></div>
+      </div>
+      <div class="site-preloader-status">initializing</div>
+    </div>
+  </div>
+
+  <main id="minimalOledApp" class="oled-root is-centered">
+    <div class="oled-container">
+      
+      <header class="oled-top-bar">
+        <div class="oled-brand-box">
+          <span class="oled-brand-title">psn checker</span>
+          <span class="oled-release-badge font-mono">v1.0</span>
+        </div>
+        <div class="oled-top-right" id="oledTopRight">
+          <div class="oled-account-preview hidden" id="oledAccountPreview">
+            <span id="oledAccountOnlineId" class="oled-online-id"></span>
+            <span id="oledAccountTierBadge" class="oled-tier-badge"></span>
+          </div>
+          <button type="button" id="btnOledLogout" class="oled-btn-logout hidden">log out</button>
+          <button type="button" id="btnOpenInfo" class="oled-btn-info" title="About &amp; FAQ" aria-label="About &amp; FAQ">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="12" y1="16" x2="12" y2="12"></line>
+              <line x1="12" y1="8" x2="12.01" y2="8"></line>
+            </svg>
+          </button>
+        </div>
+      </header>
+
+      <section class="oled-control-section" id="oledControlSection">
+        <div class="oled-unified-card">
+          
+          <div class="oled-token-group">
+            <label for="oledTokenInput" class="oled-label">enter token:</label>
+            <div class="oled-input-row">
+              <input 
+                type="password" 
+                id="oledTokenInput" 
+                class="oled-input-field font-mono" 
+                placeholder="paste 64-character NPSSO token here..." 
+                autocomplete="off"
+              >
+              <button type="button" id="btnOledTogglePass" class="oled-btn oled-btn-icon" title="Toggle visibility">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              </button>
+              <button type="button" id="btnOledFetch" class="oled-btn oled-btn-primary">
+                CONNECT &amp; FETCH
+              </button>
+            </div>
+
+            <div class="oled-token-sub-row">
+              <button type="button" id="btnOledHowToReceive" class="oled-trigger-btn" aria-expanded="false">
+                <span>how to receive</span>
+                <svg class="oled-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+              </button>
+            </div>
+
+            <div id="oledTutorialDrawer" class="oled-drawer-animated">
+              <div class="oled-drawer-content">
+                <div class="oled-tutorial-card">
+                  <div class="oled-tutorial-step">
+                    <span class="step-idx">01</span>
+                    <div>
+                      <strong>Sign in to PlayStation.com</strong>
+                      <p>Open your PlayStation account in your browser.</p>
+                      <a href="https://www.playstation.com" target="_blank" rel="noopener noreferrer" class="oled-link">Open PlayStation.com &nearr;</a>
+                    </div>
+                  </div>
+                  <div class="oled-tutorial-step">
+                    <span class="step-idx">02</span>
+                    <div>
+                      <strong>Open Sony SSO Cookie Endpoint</strong>
+                      <p>In the same browser session, open:</p>
+                      <a href="https://ca.account.sony.com/api/v1/ssocookie" target="_blank" rel="noopener noreferrer" class="oled-link">ca.account.sony.com/api/v1/ssocookie &nearr;</a>
+                    </div>
+                  </div>
+                  <div class="oled-tutorial-step">
+                    <span class="step-idx">03</span>
+                    <div>
+                      <strong>Copy 64-character token</strong>
+                      <div class="oled-code font-mono">{"npsso": "your-64-character-token-here"}</div>
+                      <p>Copy only the token string inside the quotes and paste it above.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="oled-box-divider"></div>
+
+          <div class="oled-logs-group">
+            <button type="button" id="btnOledToggleLogs" class="oled-accordion-head" aria-expanded="false">
+              <div class="oled-accordion-title">
+                <span>Logs</span>
+                <span id="oledLogsStatusBadge" class="oled-mini-badge">READY</span>
+              </div>
+              <div class="oled-accordion-right">
+                <span id="oledLogsEtaText" class="oled-meta-caption"></span>
+                <svg class="oled-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+              </div>
+            </button>
+            
+            <div id="oledLogsDrawer" class="oled-drawer-animated">
+              <div class="oled-drawer-content">
+                <div class="oled-progress-bar-wrap">
+                  <div id="oledProgressBar" class="oled-progress-bar" style="width: 0%"></div>
+                </div>
+                <div class="oled-log-stream font-mono" id="oledLogsStream">
+                  <div class="log-line">Ready. Enter token above to scan your library.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <section class="oled-games-section hidden" id="oledGamesSection">
+        <div class="oled-library-box">
+          
+          <div class="oled-library-header">
+            <nav class="oled-tabs-nav" id="oledTabsNav">
+              <button type="button" class="oled-tab-btn" data-oled-tab="psplus" id="tabOledPsPlus">
+                PS PLUS
+              </button>
+              <button type="button" class="oled-tab-btn active" data-oled-tab="ps4-owned" id="tabOledPs4Owned">
+                PS4 OWNED <span class="tab-cnt" id="oledCountPs4Owned">0</span>
+              </button>
+              <button type="button" class="oled-tab-btn" data-oled-tab="ps5-owned" id="tabOledPs5Owned">
+                PS5 OWNED <span class="tab-cnt" id="oledCountPs5Owned">0</span>
+              </button>
+              <button type="button" class="oled-tab-btn" data-oled-tab="ps4-plus" id="tabOledPs4Plus">
+                PS4 PS+ <span class="tab-cnt" id="oledCountPs4Plus">0</span>
+              </button>
+              <button type="button" class="oled-tab-btn" data-oled-tab="ps5-plus" id="tabOledPs5Plus">
+                PS5 PS+ <span class="tab-cnt" id="oledCountPs5Plus">0</span>
+              </button>
+            </nav>
+
+            <div class="oled-search-container" id="oledSearchContainer">
+              <input type="text" class="oled-subsearch font-mono" id="oledGameSearch" placeholder="filter games in tab...">
+            </div>
+          </div>
+
+          <div class="oled-tab-pane hidden" id="paneOledPsPlus">
+            <div class="oled-psplus-pane-wrap">
+              <div class="oled-pane-title-row">
+                <h3 class="oled-pane-heading">PlayStation Plus</h3>
+                <span class="oled-status-tag" id="oledPsPlusStatusTag">ACTIVE</span>
+              </div>
+              <div class="oled-info-grid">
+                <div class="info-cell">
+                  <span class="cell-label">MEMBERSHIP</span>
+                  <span class="cell-value" id="oledPsPlusTier">Loading...</span>
+                </div>
+                <div class="info-cell">
+                  <span class="cell-label">STATUS</span>
+                  <span class="cell-value" id="oledPsPlusStatus">Loading...</span>
+                </div>
+                <div class="info-cell">
+                  <span class="cell-label">TOTAL PS+ CLAIMS</span>
+                  <span class="cell-value" id="oledPsPlusCount">0 Titles</span>
+                </div>
+                <div class="info-cell">
+                  <span class="cell-label">ACCOUNT ONLINE ID</span>
+                  <span class="cell-value" id="oledPsPlusAccount">Loading...</span>
+                </div>
+                <div class="info-cell full-width">
+                  <span class="cell-label">BENEFITS</span>
+                  <span class="cell-value-desc" id="oledPsPlusPerks">Monthly Games, Online Multiplayer, Exclusive Discounts &amp; Cloud Storage</span>
+                </div>
+                <div class="info-cell full-width">
+                  <a href="https://store.playstation.com/subscriptions" target="_blank" rel="noopener noreferrer" class="oled-link">
+                    Manage Membership on PlayStation &nearr;
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="oled-tab-pane" id="paneOledPs4Owned">
+            <div class="oled-games-list scrollable-games" id="listPs4Owned"></div>
+          </div>
+
+          <div class="oled-tab-pane hidden" id="paneOledPs5Owned">
+            <div class="oled-games-list scrollable-games" id="listPs5Owned"></div>
+          </div>
+
+          <div class="oled-tab-pane hidden" id="paneOledPs4Plus">
+            <div class="oled-games-list scrollable-games" id="listPs4Plus"></div>
+          </div>
+
+          <div class="oled-tab-pane hidden" id="paneOledPs5Plus">
+            <div class="oled-games-list scrollable-games" id="listPs5Plus"></div>
+          </div>
+
+        </div>
+      </section>
+
+      <footer class="oled-footer hidden">
+        <button type="button" id="btnOpenCopySimple" class="oled-btn-outline">COPY SIMPLE LIST</button>
+        <a href="/api/download/csv" class="oled-btn-outline">EXPORT CSV</a>
+      </footer>
+
+    </div>
+  </main>
+
+  <!-- Game Details Modal -->
+  <div id="gameDetailModal" class="ps-modal-backdrop hidden">
+    <div class="ps-modal-dialog game-modal-dialog">
+      <button class="ps-modal-close" id="btnModalClose" title="Close (Esc)">&times;</button>
+      
+      <div class="modal-game-header">
+        <div class="modal-cover-square-box">
+          <img id="modalCoverImg" src="" alt="Cover" class="modal-square-artwork">
+        </div>
+        <div class="modal-header-meta">
+          <div class="modal-title-row">
+            <span id="modalPlatformBadge" class="ps-platform-tag">PS5</span>
+            <span id="modalLicenseBadge" class="ps-license-tag">OWNED</span>
+          </div>
+          <h2 id="modalGameTitle" class="modal-game-name">Game Title</h2>
+        </div>
+      </div>
+
+      <div class="modal-dialog-body">
+
+        <div class="modal-specs-grid">
+          <div class="spec-cell">
+            <span class="spec-label">Title ID</span>
+            <span id="modalTitleId" class="spec-val font-mono">PPSA01234_00</span>
+          </div>
+          <div class="spec-cell">
+            <span class="spec-label">Entitlement ID</span>
+            <span id="modalEntitlementId" class="spec-val font-mono">UP1004-PPSA...</span>
+          </div>
+          <div class="spec-cell">
+            <span class="spec-label">Recorded Playtime</span>
+            <span id="modalPlaytime" class="spec-val">0h</span>
+          </div>
+          <div class="spec-cell">
+            <span class="spec-label">Play Count</span>
+            <span id="modalPlayCount" class="spec-val">0</span>
+          </div>
+          <div class="spec-cell">
+            <span class="spec-label">Last Session</span>
+            <span id="modalLastPlayed" class="spec-val">N/A</span>
+          </div>
+          <div class="spec-cell">
+            <span class="spec-label">License Status</span>
+            <span id="modalDownloadable" class="spec-val">Active Entitlement</span>
+          </div>
+        </div>
+
+        <div class="modal-actions-bar">
+          <button id="btnCopyDetails" class="btn btn-ps-secondary">
+            Copy Details
+          </button>
+          <a id="modalStoreLink" href="https://store.playstation.com" target="_blank" rel="noopener noreferrer" class="btn btn-ps-primary">
+            View on Store &nearr;
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Copy Simple List Modal -->
+  <div id="copySimpleModal" class="ps-modal-backdrop hidden">
+    <div class="ps-modal-dialog copy-modal-dialog">
+      <button class="ps-modal-close" id="btnCopyModalClose" title="Close (Esc)">&times;</button>
+      
+      <div class="copy-modal-header">
+        <span class="copy-modal-tag font-mono">list export</span>
+        <h2 class="copy-modal-title">copy simple list</h2>
+        <p class="copy-modal-subtitle">choose format to copy clean game list grouped by platform:</p>
+      </div>
+
+      <div class="copy-options-list">
+        <button type="button" id="btnCopyWithPlus" class="copy-option-item">
+          <div class="copy-option-left">
+            <div class="copy-option-title-row">
+              <span class="copy-option-title">copy with ps+ list</span>
+              <span class="copy-option-badge badge-plus">ALL TITLES</span>
+            </div>
+            <span class="copy-option-meta font-mono" id="copyWithPlusMeta">includes purchased + playstation plus claims</span>
+          </div>
+          <span class="copy-option-action font-mono">copy &rarr;</span>
+        </button>
+
+        <button type="button" id="btnCopyWithoutPlus" class="copy-option-item">
+          <div class="copy-option-left">
+            <div class="copy-option-title-row">
+              <span class="copy-option-title">copy without ps+ list</span>
+              <span class="copy-option-badge">OWNED ONLY</span>
+            </div>
+            <span class="copy-option-meta font-mono" id="copyWithoutPlusMeta">owned digital purchases only</span>
+          </div>
+          <span class="copy-option-action font-mono">copy &rarr;</span>
+        </button>
+      </div>
+
+      <div class="copy-modal-hint font-mono">
+        format: PS4 &amp; PS5 sections &bull; sorted A-Z &bull; clean text
+      </div>
+    </div>
+  </div>
+
+  <!-- About & FAQ Modal -->
+  <div id="infoModal" class="ps-modal-backdrop hidden">
+    <div class="ps-modal-dialog info-modal-dialog">
+      <button class="ps-modal-close" id="btnInfoModalClose" title="Close (Esc)">&times;</button>
+      
+      <div class="info-modal-header">
+        <div class="info-modal-tag-row">
+          <span class="info-badge font-mono">RELEASE BUILD</span>
+          <span class="info-badge badge-version font-mono">v1.0</span>
+        </div>
+        <h2 class="info-modal-title">psn checker</h2>
+        <p class="info-modal-subtitle">Minimal, open-source PlayStation Network digital library &amp; entitlement analyzer.</p>
+      </div>
+
+      <div class="info-author-card">
+        <img src="author-avatar.png" alt="Nimalan Rao" class="info-author-avatar-img">
+        <div class="info-author-details">
+          <div class="info-author-name">Built by Nimalan Rao</div>
+          <a href="https://github.com/nimalanrao" target="_blank" rel="noopener noreferrer" class="info-author-link">
+            <svg class="author-github-icon" width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+              <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/>
+            </svg>
+            <span>@nimalanrao on GitHub &nearr;</span>
+          </a>
+        </div>
+      </div>
+
+      <div class="info-content-scroll">
+        <div class="info-section">
+          <h3 class="info-section-heading">How to Use</h3>
+          <div class="info-steps-list">
+            <div class="info-step-item">
+              <span class="info-step-num font-mono">01</span>
+              <div>
+                <strong>Sign in to PlayStation.com</strong>
+                <p>Log in with your normal PlayStation account in any browser tab.</p>
+              </div>
+            </div>
+            <div class="info-step-item">
+              <span class="info-step-num font-mono">02</span>
+              <div>
+                <strong>Get your session token</strong>
+                <p>In the same browser, open <a href="https://ca.account.sony.com/api/v1/ssocookie" target="_blank" rel="noopener noreferrer" class="oled-link">ca.account.sony.com/api/v1/ssocookie &nearr;</a></p>
+              </div>
+            </div>
+            <div class="info-step-item">
+              <span class="info-step-num font-mono">03</span>
+              <div>
+                <strong>Copy the 64-character NPSSO token</strong>
+                <p>Copy only the string inside <code>{"npsso": "..."}</code>.</p>
+              </div>
+            </div>
+            <div class="info-step-item">
+              <span class="info-step-num font-mono">04</span>
+              <div>
+                <strong>Paste &amp; Fetch</strong>
+                <p>Paste the token into the field and click <strong>CONNECT &amp; FETCH</strong>. Your games will be organized into PS5/PS4 owned titles and PS Plus claims.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="info-section">
+          <h3 class="info-section-heading">Frequently Asked Questions</h3>
+          <div class="faq-list">
+            <div class="faq-item">
+              <div class="faq-question">Is this safe to use?</div>
+              <div class="faq-answer">
+                Yes, 100%. This tool is completely open source and runs entirely on your local machine. You never enter your PlayStation password. Your NPSSO token is only transmitted directly to Sony's official OAuth servers over encrypted HTTPS, and is never logged, stored on external servers, or shared with third parties.
+              </div>
+            </div>
+            <div class="faq-item">
+              <div class="faq-question">How does it work?</div>
+              <div class="faq-answer">
+                It uses Sony's official OAuth 2.0 gateway. The 64-character NPSSO token exchanges for a temporary access code, which generates a short-lived bearer token. It then queries Sony's official GraphQL catalog (<code>getPurchasedGames</code>) and activity history APIs to separate perpetual digital purchases from subscription-based PS Plus claims.
+              </div>
+            </div>
+            <div class="faq-item">
+              <div class="faq-question">Can my PlayStation account get banned?</div>
+              <div class="faq-answer">
+                No. The requests made are standard, read-only API calls—the exact same requests made by the official PlayStation Mobile App and the web store to display your library.
+              </div>
+            </div>
+            <div class="faq-item">
+              <div class="faq-question">Where is my library data saved?</div>
+              <div class="faq-answer">
+                All records are saved strictly on your local disk as <code>psn-game-library.json</code> and <code>psn-game-library.csv</code>. No telemetry or external cloud storage is used.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <aside class="oled-floating-author-wrap">
+    <a 
+      href="https://github.com/nimalanrao" 
+      target="_blank" 
+      rel="noopener noreferrer" 
+      class="btn-oled-author-link" 
+      id="authorGithubLink" 
+      title="GitHub: @nimalanrao"
+    >
+      <img src="author-avatar.png" alt="Nimalan Rao" class="author-floating-avatar">
+      <span class="author-handle">@nimalanrao</span>
+    </a>
+  </aside>
+
+  <div id="toastNotification" class="ps-toast hidden"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
